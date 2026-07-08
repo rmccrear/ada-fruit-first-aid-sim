@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trauma Trainer Telemetry Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@400;600;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="logo-area">
+        <svg class="icon-pulse" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <h1>TRAUMA TRAINER <span class="accent-text">TELEMETRY</span></h1>
+      </div>
+      <div class="header-controls">
+        <div class="status-indicator disconnected" id="connection-status">
+          <span class="status-dot"></span>
+          <span class="status-label">DISCONNECTED</span>
+        </div>
+        <button id="btn-connect" class="btn-primary">
+          <svg class="btn-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="2" width="20" height="8" rx="2" ry="2"/>
+            <rect x="2" y="14" width="20" height="8" rx="2" ry="2"/>
+            <line x1="6" y1="6" x2="6.01" y2="6"/>
+            <line x1="6" y1="18" x2="6.01" y2="18"/>
+          </svg>
+          CONNECT DEVICE
+        </button>
+        <button id="btn-toggle-sim" class="btn-secondary">
+          ENABLE SIMULATION
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Grid -->
+    <main class="dashboard-grid">
+      
+      <!-- Left Column: Metrics & Visual Feedback -->
+      <section class="grid-col-left">
+        
+        <!-- Target Goal Status Banner -->
+        <div class="card status-banner state-idle" id="training-banner">
+          <div class="banner-title" id="banner-title">READY TO TRAIN</div>
+          <div class="banner-desc" id="banner-desc">Connect device or enable simulation mode to begin training.</div>
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill" id="banner-progress" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- Main Sensors Grid -->
+        <div class="metrics-grid">
+          <!-- Direct Pressure Card -->
+          <div class="card metric-card">
+            <div class="card-header">
+              <span class="card-title">DIRECT PRESSURE</span>
+              <span class="badge" id="direct-status-badge">LOW</span>
+            </div>
+            <div class="metric-value-container">
+              <span class="metric-number" id="lbl-direct-lb">0.0</span>
+              <span class="metric-unit">lb</span>
+            </div>
+            <div class="metric-subtext" id="lbl-direct-adc">ADC Value: 0</div>
+            <div class="gauge-bar">
+              <div class="gauge-fill direct-fill" id="bar-direct" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <!-- Tourniquet Pressure Card -->
+          <div class="card metric-card">
+            <div class="card-header">
+              <span class="card-title">TOURNIQUET PRESSURE</span>
+              <span class="badge" id="tq-status-badge">LOW</span>
+            </div>
+            <div class="metric-value-container">
+              <span class="metric-number" id="lbl-tq-lb">0.0</span>
+              <span class="metric-unit">lb</span>
+            </div>
+            <div class="metric-subtext" id="lbl-tq-adc">ADC Avg: 0 / Threshold: 16.0 lb</div>
+            <div class="gauge-bar">
+              <div class="gauge-fill tq-fill" id="bar-tq" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tourniquet Individual Sensors Grid -->
+        <div class="card sensor-grid-card">
+          <h2 class="section-title">INDIVIDUAL TOURNIQUET SENSORS</h2>
+          <div class="sensor-grid">
+            <div class="sensor-sub-card">
+              <span class="sensor-label">SENSOR T1</span>
+              <div class="sensor-val" id="lbl-t1">0</div>
+              <div class="sub-gauge-bar"><div class="sub-gauge-fill" id="bar-t1" style="width: 0%"></div></div>
+            </div>
+            <div class="sensor-sub-card">
+              <span class="sensor-label">SENSOR T2</span>
+              <div class="sensor-val" id="lbl-t2">0</div>
+              <div class="sub-gauge-bar"><div class="sub-gauge-fill" id="bar-t2" style="width: 0%"></div></div>
+            </div>
+            <div class="sensor-sub-card">
+              <span class="sensor-label">SENSOR T3</span>
+              <div class="sensor-val" id="lbl-t3">0</div>
+              <div class="sub-gauge-bar"><div class="sub-gauge-fill" id="bar-t3" style="width: 0%"></div></div>
+            </div>
+            <div class="sensor-sub-card">
+              <span class="sensor-label">SENSOR T4</span>
+              <div class="sensor-val" id="lbl-t4">0</div>
+              <div class="sub-gauge-bar"><div class="sub-gauge-fill" id="bar-t4" style="width: 0%"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- NeoPixel ring visualizer -->
+        <div class="card neopixel-card">
+          <div class="neopixel-layout">
+            <div class="neopixel-visualizer-container">
+              <svg class="neopixel-ring" viewBox="0 0 200 200">
+                <circle cx="100" cy="100" r="85" fill="none" stroke="#22252a" stroke-width="8" />
+                <g id="neopixels-group">
+                  <!-- Generated by javascript dynamically -->
+                </g>
+              </svg>
+              <div class="ring-label-overlay">
+                <div class="ring-label-title">NEOPIXEL FEEDBACK</div>
+                <div class="ring-label-state" id="lbl-ring-state">OFF</div>
+              </div>
+            </div>
+            <div class="neopixel-legend">
+              <h3>HARDWARE STATUS INDICATOR</h3>
+              <p>The NeoPixel ring provides instant visual feedback for the operator:</p>
+              <ul class="legend-list">
+                <li>
+                  <span class="legend-color legend-red"></span>
+                  <span class="legend-text"><strong>Red:</strong> Pressure applied is below target. Brightness scales with pressure.</span>
+                </li>
+                <li>
+                  <span class="legend-color legend-cyan"></span>
+                  <span class="legend-text"><strong>Cyan Pulse:</strong> Target pressure (16.0 lb) reached. Hold for 2 seconds.</span>
+                </li>
+                <li>
+                  <span class="legend-color legend-green"></span>
+                  <span class="legend-text"><strong>Green Glow:</strong> Success! Tourniquet successfully applied.</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Graphs, Controls, Logs -->
+      <section class="grid-col-right">
+        
+        <!-- Live Telemetry Graph -->
+        <div class="card graph-card">
+          <div class="card-header">
+            <span class="card-title">PRESSURE TELEMETRY CHART</span>
+            <div class="graph-legend">
+              <span class="graph-legend-item"><span class="legend-line line-direct"></span>Direct</span>
+              <span class="graph-legend-item"><span class="legend-line line-tq"></span>Tourniquet</span>
+            </div>
+          </div>
+          <div class="canvas-container">
+            <canvas id="telemetry-chart"></canvas>
+          </div>
+        </div>
+
+        <!-- Simulation Controls Panel (Hidden by default, shown when enabled) -->
+        <div class="card simulation-card collapsed" id="simulation-panel">
+          <h2 class="section-title">SIMULATOR CONTROLS</h2>
+          <p class="sim-instruction">Drag the sliders to simulate live pressure readings without hardware.</p>
+          <div class="slider-group">
+            <div class="slider-item">
+              <div class="slider-labels">
+                <span>Direct FSR (GPIO 34)</span>
+                <span class="slider-val-readout" id="sim-direct-val">0 / 0.0 lb</span>
+              </div>
+              <input type="range" id="slider-direct" min="0" max="4095" value="0">
+            </div>
+            <div class="slider-row">
+              <div class="slider-item">
+                <div class="slider-labels">
+                  <span>Tourniquet T1 (GPIO 35)</span>
+                  <span class="slider-val-readout" id="sim-t1-val">0</span>
+                </div>
+                <input type="range" id="slider-t1" min="0" max="4095" value="0">
+              </div>
+              <div class="slider-item">
+                <div class="slider-labels">
+                  <span>Tourniquet T2 (GPIO 32)</span>
+                  <span class="slider-val-readout" id="sim-t2-val">0</span>
+                </div>
+                <input type="range" id="slider-t2" min="0" max="4095" value="0">
+              </div>
+            </div>
+            <div class="slider-row">
+              <div class="slider-item">
+                <div class="slider-labels">
+                  <span>Tourniquet T3 (GPIO 33)</span>
+                  <span class="slider-val-readout" id="sim-t3-val">0</span>
+                </div>
+                <input type="range" id="slider-t3" min="0" max="4095" value="0">
+              </div>
+              <div class="slider-item">
+                <div class="slider-labels">
+                  <span>Tourniquet T4 (GPIO 25)</span>
+                  <span class="slider-val-readout" id="sim-t4-val">0</span>
+                </div>
+                <input type="range" id="slider-t4" min="0" max="4095" value="0">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Serial Terminal Log -->
+        <div class="card terminal-card">
+          <div class="card-header">
+            <span class="card-title">RAW SERIAL TELEMETRY LOG</span>
+            <div class="terminal-actions">
+              <button id="btn-clear-log" class="btn-text">Clear</button>
+              <button id="btn-copy-log" class="btn-text">Copy</button>
+            </div>
+          </div>
+          <div class="terminal-body" id="serial-terminal">
+            <div class="terminal-line system-msg">Dashboard ready. Awaiting connection...</div>
+          </div>
+        </div>
+
+      </section>
+      
+    </main>
+  </div>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
